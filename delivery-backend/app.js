@@ -5,7 +5,7 @@ const Product = require('./models/Product');
 const Pincode = require('./models/Pincode');
 const { getAllDocuments } = require('./utils/dbUtils');
 const app = express();
-app.use(cors({ origin: 'http://127.0.0.1:5500' }));
+app.use(cors({ origin: 'https://delivery-estimation-website.vercel.app' }));
 app.use(express.json());
 // Function to get delivery estimate
 const getDeliveryEstimate = (provider, pincode, orderTime, inStock) => {
@@ -181,7 +181,7 @@ app.get('/check-product/:product_id', async (req, res) => {
 });
 
 // Connect to MongoDB
-mongoose.connect('mongodb://localhost:27017/deliveryapp', {
+mongoose.connect('mongodb+srv://<Harshini>:<Honey>@cluster0.mongodb.net/<deliveryapp>?retryWrites=true&w=majority', {
     connectTimeoutMS: 30000,
     socketTimeoutMS: 30000
 })
