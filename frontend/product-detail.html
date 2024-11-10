@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Detail</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .product-detail {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .product-detail img {
+            width: 300px;
+            height: 300px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        .buy-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #28a745;
+            border: none;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .buy-btn:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="product-detail">
+            <h2 id="productName">Loading...</h2>
+            <img id="productImage" src="" alt="Product Image">
+            <p id="productPrice">Loading...</p>
+            <p id="availabilityMessage">Loading...</p>
+            <button id="buyButton" class="buy-btn" style="display: none;" onclick="navigateToPincodePage()">Buy Now</button>
+            <button class="btn btn-secondary mt-3" onclick="window.location.href='index.html'">Back to Products</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Get product ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const productId = urlParams.get('product_id');
+
+        // Fetch product details from backend using the product ID
+        fetch(`http://localhost:3000/product-details/${productId}`)
+    .then(response => response.json())
+    .then(data => {
+        const product = data.product;
+        const inStock = data.available;  // Checking the available field
+
+        // Display product info
+        document.getElementById('productName').textContent = product.product_name;
+        document.getElementById('productPrice').textContent = `Price: ₹${product.price}`;
+
+        // Show availability and update Buy Now button
+        if (inStock) {
+            document.getElementById('stockStatus').textContent = 'In Stock';
+            document.getElementById('buyButton').style.display = 'block';  // Show "Buy Now" button
+        } else {
+            document.getElementById('stockStatus').textContent = 'Out of Stock';
+            document.getElementById('buyButton').style.display = 'none';  // Hide "Buy Now" button
+        }
+    })
+    .catch(error => console.error('Error:', error));
+
+
+        // Function to navigate to the pincode entry page
+        function navigateToPincodePage() {
+            window.location.href = `pincode.html?product_id=${productId}`; // Pass product_id as query parameter
+        }
+    </script>
+    
+    
+</body>
+</html>

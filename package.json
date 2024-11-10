@@ -1,0 +1,12 @@
+{
+    "name": "UNSTOP",
+    "version": "1.0.0",
+    "scripts": {
+        "start": "concurrently \"npm run start:frontend\" \"npm run start:backend\"",
+        "start:frontend": "cd delivery-app && npm start",
+        "start:backend": "cd delivery-backend && node app.js"
+    },
+    "devDependencies": {
+        "concurrently": "^7.6.0"
+    }
+}

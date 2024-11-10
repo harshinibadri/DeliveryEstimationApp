@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delivery Date Estimation</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color:  #19a4b6;
+        }
+        .card {
+            width: 100%;
+            max-width: 600px;
+            padding: 40px;
+            background-color: #f1f1f1;
+            box-shadow: 0 10px 10px rgba(0, 0, 0, 2);
+            border-radius: 50px;
+            height: 450px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .btn-primary {
+            width: 70%;
+            background-color: #1565C0;
+            border-color: #1565C0;
+        }
+        .btn-primary:hover {
+            background-color:  #283592;
+            border-color: #283593;
+        }
+        .btn-secondary {
+            width: 70%;
+            margin-top: 20px;
+            background-color:#00796B;
+            border-color: #00796B;
+        }
+        .btn-secondary:hover {
+            background-color: #004D40;
+            border-color: #004D40;
+        }
+        .alert {
+            padding: 10px;
+            font-size: 20px;
+            text-align: center;
+        }
+        #pincode {
+            font-size: 20px;
+            padding: 15px;
+            height: 50px;
+        }
+        .loading {
+            text-align: center;
+            font-size: 18px;
+            color: #ececec;
+        }
+    </style>
+</head>
+<body>
+    <div class="card shadow">
+        <div class="card-body">
+            <h5 class="card-title text-center" style="font-size: 36px; font-weight: bolder; color:#1E3A8A;"><i>Enter Pincode</i></h5>
+            <form id="pincodeForm">
+                <div class="form-group">
+                    <label for="pincode">Pincode:</label>
+                    <input type="text" class="form-control" id="pincode" name="pincode" placeholder="Enter your pincode" required>
+                </div>
+                <br><br>
+                <button type="submit" class="btn btn-primary">Submit</button>
+                <br>
+                <button type="button" class="btn btn-secondary mt-3" onclick="window.location.href='index.html'">Back to Products</button>
+            </form>
+            <div id="loadingMessage" class="loading" style="display: none;">Checking your pincode...</div>
+            <div id="resultMessage" class="alert mt-3" role="alert" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        document.getElementById('pincodeForm').addEventListener('submit', function(event) {         
+            event.preventDefault();
+            const pincode = document.getElementById('pincode').value.trim();
+        
+            // Check if the pincode is a 6-digit number
+            if (!/^\d{6}$/.test(pincode)) {
+                displayMessage('Please enter a valid 6-digit pincode.', 'danger');
+                return;
+            }
+        
+            // Show loading message while checking pincode
+            document.getElementById('loadingMessage').style.display = 'block';
+            document.getElementById('resultMessage').style.display = 'none';
+        
+            // Fetch from backend to check if pincode exists in the dataset
+            fetch(`http://localhost:3000/check-pincode/${pincode}`)
+                .then(response => response.json())
+                .then(data => {
+                    const resultMessage = document.getElementById('resultMessage');
+                    const loadingMessage = document.getElementById('loadingMessage');
+                    loadingMessage.style.display = 'none';
+                    console.log('Data received from backend:', data);
+        
+                    if (data.valid) {
+                        // Update current time before using it
+                        const currentTime = new Date(); // Get fresh current time each time
+                        const estimatedDelivery = new Date(data.estimatedDelivery);  // Make sure it's a valid Date object
+                        if (isNaN(estimatedDelivery.getTime())) {
+                            displayMessage('Invalid delivery date received.', 'danger');
+                            return;
+                        }
+                        resultMessage.className = 'alert alert-success';
+                        resultMessage.innerHTML = `
+                            <strong>Pincode is valid.</strong><br>
+                            <strong>Logistics Provider:</strong> ${data.logisticsProvider}<br>
+                            <strong>Estimated Delivery:</strong> ${formatDate(estimatedDelivery)}
+                        `;
+                        resultMessage.style.display = 'block';
+                        if (data.sameDayEligibilityCountdown !== null) {
+                            startCountdown(data.sameDayEligibilityCountdown);
+                        }
+                    } else {
+                        displayMessage('Invalid Pincode. Please enter a pincode within the service area.', 'danger');
+                    }
+                })
+                .catch(error => {
+                    displayMessage('An error occurred. Please try again later.', 'danger');
+                    document.getElementById('loadingMessage').style.display = 'none';
+                });
+        });
+        
+        // Function to display message
+        function displayMessage(message, type) {
+            const resultMessage = document.getElementById('resultMessage');
+            resultMessage.className = `alert alert-${type}`;
+            resultMessage.textContent = message;
+            resultMessage.style.display = 'block';
+        }
+        
+        // Function to format a date as "YYYY-MM-DD"
+        function formatDate(date) {
+            const year = date.getFullYear();
+            const month = ("0" + (date.getMonth() + 1)).slice(-2); // Add leading zero for month
+            const day = ("0" + date.getDate()).slice(-2); // Add leading zero for day
+            return `${year}-${month}-${day}`;
+        }
+        
+        // Function to start the countdown timer for same-day delivery
+        function startCountdown(seconds) {
+            const countdownContainer = document.getElementById('countdown') || document.createElement('div');
+            countdownContainer.id = 'countdown';
+            countdownContainer.className = 'alert alert-info mt-3';
+            document.getElementById('resultMessage').appendChild(countdownContainer);
+        
+            const interval = setInterval(() => {
+                if (seconds <= 0) {
+                    countdownContainer.textContent = 'Same-day delivery eligibility has expired.';
+                    clearInterval(interval);
+                    return;
+                }
+        
+                const hours = Math.floor(seconds / 3600);
+                const minutes = Math.floor((seconds % 3600) / 60);
+                const secs = seconds % 60;
+                countdownContainer.innerHTML = `<strong>Time left for Same-day delivery</strong>: ${hours}h ${minutes}m ${secs}s`;
+                seconds--;
+            }, 1000);
+        }
+        </script>
+        
+</body>
+</html>

@@ -1,0 +1,96 @@
+<body>
+    <div class="container">
+        <h1 class="text-center mt-6"><b> <i>Products List</i></b></h1>
+        <div class="product-grid">
+            <!-- Moisturizer -->
+            <div class="product-item">
+                <img src="https://th.bing.com/th/id/OIP.DAZvhmzO0sxCp-uWdJBEawHaFa?w=216&h=180&c=7&r=0&o=5&pid=1.7" alt="Moisturizer">
+                <p>Mobile</p>
+                <p>Price: ₹63.54</p>
+                <button class="add-to-cart-btn">Add to Cart</button>
+            </div>
+
+            <!-- Shoes -->
+            <div class="product-item">
+                <img src="https://th.bing.com/th?id=OIP.XdCPJSZ4Vo3Wy33pr2W_CwHaHa&w=250&h=250&c=8&rs=1&qlt=90&o=6&pid=3.1&rm=2" alt="Shoes">
+                <p>Shoes</p>
+                <p>Price: ₹129.96</p>
+                <button class="add-to-cart-btn">Add to Cart</button>
+            </div>
+
+            <!-- Shirt -->
+            <div class="product-item">
+                <img src="https://th.bing.com/th/id/OIP.mii6o50vDN0cJxqulxR-ggHaIG?w=193&h=212&c=7&r=0&o=5&pid=1.7" alt="Shirt">
+                <p>Shirt</p>
+                <p>Price: ₹163.19</p>
+                <button class="add-to-cart-btn">Add to Cart</button>
+            </div>
+
+            <!-- Jewelry -->
+            <div class="product-item">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTKuYnMSwDwsTirCqsY3di32iICY_oUTr3xDA&s" alt="Jewelry">
+                <p>Jewellery</p>
+                <p>Price: ₹570.07</p>
+                <button class="add-to-cart-btn">Add to Cart</button>
+            </div>
+
+            <!-- Saree -->
+            <div class="product-item">
+                <img src="https://i.pinimg.com/originals/6f/32/10/6f3210fbc5141754b14ab3dbba5b252c.jpg" alt="Saree">
+                <p>Saree</p>
+                <p>Price: ₹934.04</p>
+                <button class="add-to-cart-btn">Add to Cart</button>
+            </div>
+
+            <!-- Kurti Set -->
+            <div class="product-item">
+                <img src="https://th.bing.com/th/id/OIP.FIfBf_LwwGMiKxSpJSd8VwHaHa?pid=ImgDet&w=191&h=191&c=7" alt="Kurti Set">
+                <p>Kurti Set</p>
+                <p>Price: ₹99.83</p>
+                <button class="add-to-cart-btn">Add to Cart</button>
+            </div>
+
+            <!-- Decoration Items -->
+            <div class="product-item">
+                <img src="https://images.unsplash.com/photo-1519710164239-da123dc03ef4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MXwyMDg2NHwwfDF8c2VhcmNofDJ8fGRlY29yYXRpb24lMjBpdGVtc3xlbnwwfHx8&ixlib=rb-1.2.1&q=80&w=200" alt="Decoration Items">
+                <p>Decoration Items</p>
+                <p>Price: ₹129.96</p>
+                <button class="add-to-cart-btn">Add to Cart</button>
+            </div>
+
+            <!-- Electronics -->
+            <div class="product-item">
+                <img src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MXwyMDg2NHwwfDF8c2VhcmNofDF8fGVsZWN0cm9uaWNzJTIwcHJvZHVjdHxlbnwwfHx8&ixlib=rb-1.2.1&q=80&w=200" alt="Electronics">
+                <p>Electronics</p>
+                <p>Price: ₹570.07</p>
+                <button class="add-to-cart-btn">Add to Cart</button>
+            </div>
+        </div>
+    </div>
+
+
+    app.get('/check-pincode/:pincode', async (req, res) => {
+        const pincode = req.params.pincode;
+        console.log(`Received pincode: ${pincode}`); // Log the received pincode
+    
+        try {
+            if (!pincode) {
+                return res.status(400).json({ error: 'Pincode is not provided' });
+            }
+    
+            const pincodeData = await Pincode.findOne({ pincode: pincode });
+    
+            if (!pincodeData) {
+                return res.status(400).json({ valid: false, message: 'Invalid Pincode' });
+            }
+    
+            return res.json({
+                valid: true,
+                logisticsProvider: pincodeData['Logistics Provider'] || 'No provider available',
+                TAT: pincodeData.TAT || 'No TAT available'
+            });
+        } catch (err) {
+            console.error('Error checking pincode:', err.message);
+            return res.status(500).json({ error: 'Error checking pincode', details: err.message });
+        }
+    });
