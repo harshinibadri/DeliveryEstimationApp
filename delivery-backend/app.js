@@ -6,7 +6,6 @@ const Pincode = require('./models/Pincode');
 const { getAllDocuments } = require('./utils/dbUtils');
 const app = express();
 app.use(cors({ origin: ['https://delivery-estimation-frontend.vercel.app']
-             methods:["GET"],
               credentials: true}));
 app.use(express.json());
 // Function to get delivery estimate
