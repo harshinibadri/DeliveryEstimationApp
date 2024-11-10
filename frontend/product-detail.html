@@ -50,7 +50,7 @@
         const productId = urlParams.get('product_id');
 
         // Fetch product details from backend using the product ID
-        fetch(`http://localhost:3000/product-details/${productId}`)
+        fetch(`https://delivery-estimation-website.vercel.app/${productId}`)
     .then(response => response.json())
     .then(data => {
         const product = data.product;
@@ -70,14 +70,10 @@
         }
     })
     .catch(error => console.error('Error:', error));
-
-
         // Function to navigate to the pincode entry page
         function navigateToPincodePage() {
             window.location.href = `pincode.html?product_id=${productId}`; // Pass product_id as query parameter
         }
     </script>
-    
-    
 </body>
 </html>
