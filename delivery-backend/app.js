@@ -5,7 +5,8 @@ const Product = require('./models/Product');
 const Pincode = require('./models/Pincode');
 const { getAllDocuments } = require('./utils/dbUtils');
 const app = express();
-app.use(cors({ origin: 'https://delivery-estimation-website.vercel.app' }));
+app.use(cors({ origin: ['https://delivery-estimation-website.vercel.app']
+             methods:["GET"}));
 app.use(express.json());
 // Function to get delivery estimate
 const getDeliveryEstimate = (provider, pincode, orderTime, inStock) => {
