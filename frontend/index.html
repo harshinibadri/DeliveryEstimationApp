@@ -78,7 +78,7 @@
 
     <script>
         // Fetch products from the backend
-        fetch('https://delivery-estimation-website.vercel.app/products')
+        fetch('http://localhost:3000/products')
             .then(response => response.json())
             .then(products => {
                 const productGrid = document.getElementById('productGrid');
@@ -115,7 +115,7 @@
             button.disabled = true;
             button.innerText = 'Checking...';
             // Make an API call to check availability
-            fetch(`https://delivery-estimation-website.vercel.app/${productId}`)
+            fetch(`http://localhost:3000/check-product/${productId}`)
                 .then(response => response.json())
                 .then(data => {
                     const statusDiv = document.getElementById(`status-${productId}`);
