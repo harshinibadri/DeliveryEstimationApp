@@ -137,21 +137,26 @@ app.get('/check-pincode/:pincode', async (req, res) => {
 app.get('/products', async (req, res) => {
     try {
         const products = await getAllDocuments('Products');
-        console.log('Fetched products:', products);
+        console.log('Fetched products:', products); // Check what `products` contains
+        
+        if (!Array.isArray(products)) {
+            throw new Error("Expected an array of products but received something else.");
+        }
 
         const productList = products.map(product => ({
             product_id: product.product_id,
             product_name: product.product_name,
             price: product.price,
-            imageUrl: product.imageUrl || 'https://th.bing.com/th/id/OIP.DAZvhmzO0sxCp-uWdJBEawHaFa?w=216&h=180&c=7&r=0&o=5&pid=1.7'
+            imageUrl: product.imageUrl || 'https://default-image-url.com'
         }));
 
         res.json(productList);
     } catch (error) {
         console.error('Error retrieving products:', error);
-        res.status(500).json({ message: 'Error retrieving products' });
+        res.status(500).json({ message: 'Error retrieving products', details: error.message });
     }
 });
+
 
 // Check product availability based on stock info
 app.get('/check-product/:product_id', async (req, res) => {
