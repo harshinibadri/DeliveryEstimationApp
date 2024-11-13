@@ -98,7 +98,7 @@
             document.getElementById('resultMessage').style.display = 'none';
         
             // Fetch from backend to check if pincode exists in the dataset
-            fetch(`http://localhost:3000/check-pincode/${pincode}`)
+            fetch(`https://delivery-estimation-website.vercel.app/${pincode}`)
                 .then(response => response.json())
                 .then(data => {
                     const resultMessage = document.getElementById('resultMessage');

@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         try {
             // Make a fetch request to the backend for pincode validation
-            const response = await fetch(`http://localhost:3001/check-pincode/${enteredPincode}`);
+            const response = await fetch(`https://delivery-estimation-website.vercel.app/${enteredPincode}`);
             const data = await response.json();
 
             if (response.ok) {
