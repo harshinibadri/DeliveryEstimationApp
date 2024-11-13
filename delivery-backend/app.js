@@ -15,20 +15,20 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// Connect to MongoDB using environment variable
-async function connectDB() {
-    try {
-        await mongoose.connect(process.env.MONGODB_URI, {
-            connectTimeoutMS: 30000,
-            socketTimeoutMS: 30000
-        });
-        console.log('Database connected');
-    } catch (error) {
-        console.error('Error connecting to MongoDB:', error);
-        throw error;
-    }
-}
-connectDB();
+// Connect to MongoDB using environment variable (Single approach)
+mongoose.connect(process.env.MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  connectTimeoutMS: 30000,
+  socketTimeoutMS: 30000,
+})
+.then(() => {
+    console.log('Connected to MongoDB');
+})
+.catch((err) => {
+    console.error('Error connecting to MongoDB:', err);
+    process.exit(1); // Stop the application if the database connection fails
+});
 
 // Function to get delivery estimate
 const getDeliveryEstimate = (provider, pincode, orderTime, inStock) => {
