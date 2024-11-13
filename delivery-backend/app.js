@@ -1,63 +1,53 @@
-require('dotenv').config();
-const express = require('express')
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const Product = require('./models/Product');
 const Pincode = require('./models/Pincode');
 const { getAllDocuments } = require('./utils/dbUtils');
+require('dotenv').config(); // Load environment variables
 
 const app = express();
-app.use(cors({ origin: 'http://127.0.0.1:5500' }));
-console.log('MongoDB URI:', process.env.MONGODB_URI);  // Add this line for debugging
-// Set up CORS to allow requests from your frontend domain
-app.use(cors({
-    origin: ['https://delivery-estimation-frontend.vercel.app'],
-    credentials: true
-}));
+
+// Middleware
+app.use(cors("http://127.0.0.1:5500")); // Enable CORS for all domains
 app.use(express.json());
 
-// Connect to MongoDB using environment variable (Single approach)
-mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  connectTimeoutMS: 30000,
-  socketTimeoutMS: 30000,
-})
-.then(() => {
-    console.log('Connected to MongoDB');
-})
-.catch((err) => {
-    console.error('Error connecting to MongoDB:', err);
-    process.exit(1); // Stop the application if the database connection fails
-});
+// MongoDB connection logic
+mongoose.connect('mongodb://localhost:27017/deliveryapp')
+    .then(() => console.log('Connected to MongoDB'))
+    .catch(err => console.error('Error connecting to MongoDB:', err));
 
 // Function to get delivery estimate
 const getDeliveryEstimate = (provider, pincode, orderTime, inStock) => {
-    let currentDate = new Date();
+    let currentDate = new Date(); // Local current date and time
     console.log("Current Date and Time (Local):", currentDate.toLocaleString());
 
+    // Adjust the date if the time is midnight or later
     if (currentDate.getHours() === 0 && currentDate.getMinutes() === 0) {
         currentDate.setDate(currentDate.getDate() + 1);
     }
 
+    // Set cutoffs in local time
     const cutoffTimeProviderA = new Date(currentDate);
-    cutoffTimeProviderA.setHours(17, 0, 0, 0);
+    cutoffTimeProviderA.setHours(17, 0, 0, 0); // 5:00 PM local time
 
     const cutoffTimeProviderB = new Date(currentDate);
-    cutoffTimeProviderB.setHours(9, 0, 0, 0);
+    cutoffTimeProviderB.setHours(9, 0, 0, 0); // 9:00 AM local time
 
     console.log(`Provider A cutoff (local): ${cutoffTimeProviderA.toLocaleString()}`);
     console.log(`Provider B cutoff (local): ${cutoffTimeProviderB.toLocaleString()}`);
 
-    let deliveryDate = new Date(currentDate);
+    let deliveryDate = new Date(currentDate); // Initialize delivery date as today
     let sameDayEligibilityCountdown = null;
 
-    const metroCities = ["110", "400", "560"];
-    const nonMetroCities = ["122", "125"];
-    const tier2Cities = ["128", "130"];
+    // Define regions for delivery days based on the pincode prefix
+    const metroCities = ["110", "400", "560"]; // Metro city pincodes
+    const nonMetroCities = ["122", "125"]; // Non-metro city pincodes
+    const tier2Cities = ["128", "130"]; // Tier 2-3 cities
+
     let deliveryDays;
 
+    // Determine delivery days based on pincode
     if (metroCities.some(prefix => pincode.startsWith(prefix))) {
         deliveryDays = 2;
     } else if (nonMetroCities.some(prefix => pincode.startsWith(prefix))) {
@@ -68,30 +58,34 @@ const getDeliveryEstimate = (provider, pincode, orderTime, inStock) => {
         deliveryDays = 5;
     }
 
+    // Determine the delivery date based on provider and cutoff times
     if (inStock) {
         if (provider === "Provider A") {
             if (orderTime < cutoffTimeProviderA) {
-                sameDayEligibilityCountdown = Math.floor((cutoffTimeProviderA - orderTime) / 1000);
+                sameDayEligibilityCountdown = Math.floor((cutoffTimeProviderA - orderTime) / 1000); // Countdown in seconds
             } else {
-                deliveryDate.setDate(currentDate.getDate() + 1);
+                deliveryDate.setDate(currentDate.getDate() + 1); // Set to next day if after 5 PM
             }
         } else if (provider === "Provider B") {
             if (orderTime < cutoffTimeProviderB) {
-                sameDayEligibilityCountdown = Math.floor((cutoffTimeProviderB - orderTime) / 1000);
+                sameDayEligibilityCountdown = Math.floor((cutoffTimeProviderB - orderTime) / 1000); // Countdown in seconds
             } else {
-                deliveryDate.setDate(currentDate.getDate() + 1);
+                deliveryDate.setDate(currentDate.getDate() + 1); // Set to next day if after 9 AM
             }
         } else {
+            // Default behavior if no specific provider
             deliveryDate.setDate(currentDate.getDate() + deliveryDays);
         }
     } else {
+        // Out of stock case
         return {
             estimatedDelivery: "Out of stock, delivery not available",
             sameDayEligibilityCountdown: null
         };
     }
 
-    const estimatedDelivery = deliveryDate.toLocaleDateString('en-CA');
+    // Format the delivery date in YYYY-MM-DD format
+    const estimatedDelivery = deliveryDate.toLocaleDateString('en-CA').split('T')[0];
 
     return {
         estimatedDelivery,
@@ -102,19 +96,15 @@ const getDeliveryEstimate = (provider, pincode, orderTime, inStock) => {
 // Route to check pincode with dynamic delivery estimate calculation
 app.get('/check-pincode/:pincode', async (req, res) => {
     const { pincode } = req.params;
-    console.log(`Received pincode request: ${pincode}`);
+    console.log(`Received pincode: ${pincode}`);
 
     try {
         if (!pincode) {
-            console.log('Pincode not provided');
             return res.status(400).json({ error: 'Pincode is not provided' });
         }
 
         const pincodeData = await Pincode.findOne({ pincode });
-        console.log('Pincode data fetched:', pincodeData);
-
         if (!pincodeData) {
-            console.log('Invalid Pincode');
             return res.status(400).json({ valid: false, message: 'Invalid Pincode' });
         }
 
@@ -126,7 +116,6 @@ app.get('/check-pincode/:pincode', async (req, res) => {
             new Date(),
             inStock
         );
-        console.log('Delivery estimate data:', { estimatedDelivery, sameDayEligibilityCountdown });
 
         return res.json({
             valid: true,
@@ -135,7 +124,7 @@ app.get('/check-pincode/:pincode', async (req, res) => {
             sameDayEligibilityCountdown
         });
     } catch (err) {
-        console.error('Error in /check-pincode route:', err.message);
+        console.error('Error checking pincode:', err.message);
         return res.status(500).json({ error: 'Error checking pincode', details: err.message });
     }
 });
@@ -143,30 +132,25 @@ app.get('/check-pincode/:pincode', async (req, res) => {
 // Route to get all products
 app.get('/products', async (req, res) => {
     try {
-        const products = await getAllDocuments('Products');
-        console.log('Fetched products:', products);
+        // Fetch all products from the correct 'Products' collection
+        const products = await Product.find(); 
 
-        if (!Array.isArray(products)) {
-            console.error('Products data is not an array:', products);
-            return res.status(500).json({ message: 'Error retrieving products: Data format invalid' });
-        }
+        console.log('Fetched products:', products); // Log to the console for debugging
 
+        // Map products to a list with necessary fields
         const productList = products.map(product => ({
             product_id: product.product_id,
             product_name: product.product_name,
             price: product.price,
-            imageUrl: product.imageUrl || 'https://th.bing.com/th/id/OIP.DAZvhmzO0sxCp-uWdJBEawHaFa?w=216&h=180&c=7&r=0&o=5&pid=1.7'
+            imageUrl: product.imageUrl || 'https://th.bing.com/th/id/OIP.DAZvhmzO0sxCp-uWdJBEawHaFa?w=216&h=180&c=7&r=0&o=5&pid=1.7' // Default image URL if none exists
         }));
-        console.log('Product list formatted:', productList);
 
-        res.json(productList);
-    } catch (error) {
-        console.error('Error in /products route:', error.message);
-        res.status(500).json({ message: 'Error retrieving products', details: error.message });
+        res.json(productList); // Return the products as a JSON response
+    } catch (err) {
+        console.error('Error retrieving products:', err);
+        res.status(500).json({ message: 'Error retrieving products' });
     }
 });
-
-// Check product availability based on stock info
 app.get('/check-product/:product_id', async (req, res) => {
     const { product_id } = req.params;
     try {
@@ -207,9 +191,8 @@ app.get('/check-product/:product_id', async (req, res) => {
         res.status(500).json({ error: 'Error checking product availability', details: err.message });
     }
 });
-
-// Start the server
-const PORT = process.env.PORT || 3000;
+// Start the server on a specific port
+const PORT = process.env.PORT || 3000; // Use environment variable or default to 3000
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+    console.log(`Server is running on port ${PORT}`);
 });

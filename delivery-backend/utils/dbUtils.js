@@ -1,13 +1,16 @@
-// In utils/dbUtils.js
-async function getAllDocuments(collectionName) {
+const mongoose = require('mongoose');
+
+// General utility function to fetch all documents from a given collection
+const getAllDocuments = async (collectionName) => {
     try {
-        const db = mongoose.connection;
-        const collection = db.collection(collectionName);
-        const documents = await collection.find({}).toArray();
-        console.log(`Documents fetched from ${collectionName}:`, documents);
+        // Dynamically create the model from the collection name
+        const model = mongoose.model(collectionName, new mongoose.Schema({}, { strict: false }), collectionName);
+        const documents = await model.find({});
         return documents;
     } catch (error) {
         console.error(`Error fetching documents from ${collectionName}:`, error.message);
         throw error;
     }
-}
+};
+
+module.exports = { getAllDocuments };

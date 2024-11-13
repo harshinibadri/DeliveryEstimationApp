@@ -8,13 +8,13 @@ document.addEventListener('DOMContentLoaded', () => {
         
         try {
             // Make a fetch request to the backend for pincode validation
-            const response = await fetch(`https://delivery-estimation-website.vercel.app/${enteredPincode}`);
+            const response = await fetch(`http://localhost:3000/check-pincode/${enteredPincode}`);
             const data = await response.json();
 
             if (response.ok) {
                 if (data.valid) {
                     // Show the delivery estimate if pincode is valid
-                    alert(`Delivery Estimate: ${data.deliveryEstimate}`);
+                    alert(`Delivery Estimate: ${data.estimatedDelivery}`);
                     // Close the modal if valid
                     const myModal = bootstrap.Modal.getInstance(document.getElementById('pincodeModal'));
                     myModal.hide();

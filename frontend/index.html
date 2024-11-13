@@ -79,66 +79,69 @@
     <script>
         // Fetch products from the backend
         fetch('http://localhost:3000/products')
-            .then(response => response.json())
-            .then(products => {
-                const productGrid = document.getElementById('productGrid');
+    .then(response => response.json())
+    .then(products => {
+        const productGrid = document.getElementById('productGrid');
+        
+        products.forEach(product => {
+            console.log(product);  // Check what data is returned in the console
+
+            // Ensure the necessary properties are available before rendering
+            if (product.product_id && product.product_name && product.price) {
+                const productItem = document.createElement('div');
+                productItem.classList.add('product-item');
                 
-                products.forEach(product => {
-                    console.log(product);  // Check what data is returned in the console
+                const productStatusId = `status-${product.product_id}`;
 
-                    // Ensure the necessary properties are available before rendering
-                    if (product.product_id && product.product_name && product.price) {
-                        const productItem = document.createElement('div');
-                        productItem.classList.add('product-item');
-                        
-                        const productStatusId = `status-${product.product_id}`;
+                productItem.innerHTML = `
+                    <img src="${product.imageUrl || 'https://th.bing.com/th/id/OIP.DAZvhmzO0sxCp-uWdJBEawHaFa?w=216&h=180&c=7&r=0&o=5&pid=1.7'}" alt="${product.product_name}">
+                    <p>${product.product_name}</p>
+                    <p>Price: ₹${product.price}</p>
+                    <p>Product ID: ${product.product_id}</p>
+                    <button class="view-details-btn" onclick="checkAvailability('${product.product_id}', this)">View Details</button>
+                    <div class="product-status" id="${productStatusId}"></div>
+                `;
+                productGrid.appendChild(productItem);
+            } else {
+                console.error('Missing data for product:', product);  // Log when any key property is missing
+            }
+        });
+    })
+    .catch(error => {
+        console.error('Error loading products:', error);
+    });
+    function checkAvailability(productId, button) {
+    button.disabled = true;
+    button.innerText = 'Checking...';
 
-                        productItem.innerHTML = `
-                            <img src="${product.imageUrl || 'https://th.bing.com/th/id/OIP.DAZvhmzO0sxCp-uWdJBEawHaFa?w=216&h=180&c=7&r=0&o=5&pid=1.7'}" alt="${product.product_name}">
-                            <p>${product.product_name}</p>
-                            <p>Price: ₹${product.price}</p>
-                            <p>Product ID: ${product.product_id}</p>
-                            <button class="view-details-btn" onclick="checkAvailability('${product.product_id}', this)">View Details</button>
-                            <div class="product-status" id="${productStatusId}"></div>
-                        `;
-                        productGrid.appendChild(productItem);
-                    } else {
-                        console.error('Missing data for product:', product);  // Log when any key property is missing
-                    }
-                });
-            })
-            .catch(error => {
-                console.error('Error loading products:', error);
-            });
+    // Make an API call to check product availability (compares both Product and Stock data)
+    fetch(`http://localhost:3000/check-product/${productId}`)
+        .then(response => response.json())
+        .then(data => {
+            const statusDiv = document.getElementById(`status-${productId}`);
+            if (data.available) {
+                // If the product is available, show the "Buy Now" button
+                statusDiv.innerHTML = `<button class="buy-now-btn" onclick="buyNow('${productId}')">Buy Now</button>`;
+            } else {
+                // If the product is out of stock, show "Out of Stock" message
+                statusDiv.innerHTML = `<span class="out-of-stock">Out of Stock</span>`;
+            }
+        })
+        .catch(error => {
+            console.error('Error checking product availability:', error);
+            const statusDiv = document.getElementById(`status-${productId}`);
+            statusDiv.innerHTML = `<span class="out-of-stock">Unable to check availability</span>`;
+        })
+        .finally(() => {
+            button.disabled = false;
+            button.innerText = 'View Details';
+        });
+}
 
-        function checkAvailability(productId, button) {
-            button.disabled = true;
-            button.innerText = 'Checking...';
-            // Make an API call to check availability
-            fetch(`http://localhost:3000/check-product/${productId}`)
-                .then(response => response.json())
-                .then(data => {
-                    const statusDiv = document.getElementById(`status-${productId}`);
-                    if (data.available) {
-                        // If the product is available, show the "Buy Now" button
-                        statusDiv.innerHTML = `<button class="buy-now-btn" onclick="buyNow('${productId}')">Buy Now</button>`;
-                    } else {
-                        // If the product is out of stock, show "Out of Stock" message
-                        statusDiv.innerHTML = `<span class="out-of-stock">Out of Stock</span>`;
-                    }
-                })
-                .catch(error => {
-                    console.error('Error checking product availability:', error);
-                })
-                .finally(() => {
-                    button.disabled = false;
-                    button.innerText = 'View Details'; 
-                });
-        }
+function buyNow(productId) {
+    window.location.href = `pincode.html?productId=${productId}`;
+}
 
-        function buyNow(productId) {
-            window.location.href = `pincode.html?productId=${productId}`;
-        }
     </script>
 </body>
 </html>
