@@ -100,15 +100,19 @@ const getDeliveryEstimate = (provider, pincode, orderTime, inStock) => {
 // Route to check pincode with dynamic delivery estimate calculation
 app.get('/check-pincode/:pincode', async (req, res) => {
     const { pincode } = req.params;
-    console.log(`Received pincode: ${pincode}`);
+    console.log(`Received pincode request: ${pincode}`);
 
     try {
         if (!pincode) {
+            console.log('Pincode not provided');
             return res.status(400).json({ error: 'Pincode is not provided' });
         }
 
         const pincodeData = await Pincode.findOne({ pincode });
+        console.log('Pincode data fetched:', pincodeData);
+
         if (!pincodeData) {
+            console.log('Invalid Pincode');
             return res.status(400).json({ valid: false, message: 'Invalid Pincode' });
         }
 
@@ -120,6 +124,7 @@ app.get('/check-pincode/:pincode', async (req, res) => {
             new Date(),
             inStock
         );
+        console.log('Delivery estimate data:', { estimatedDelivery, sameDayEligibilityCountdown });
 
         return res.json({
             valid: true,
@@ -128,7 +133,7 @@ app.get('/check-pincode/:pincode', async (req, res) => {
             sameDayEligibilityCountdown
         });
     } catch (err) {
-        console.error('Error checking pincode:', err.message);
+        console.error('Error in /check-pincode route:', err.message);
         return res.status(500).json({ error: 'Error checking pincode', details: err.message });
     }
 });
@@ -137,26 +142,27 @@ app.get('/check-pincode/:pincode', async (req, res) => {
 app.get('/products', async (req, res) => {
     try {
         const products = await getAllDocuments('Products');
-        console.log('Fetched products:', products); // Check what `products` contains
-        
+        console.log('Fetched products:', products);
+
         if (!Array.isArray(products)) {
-            throw new Error("Expected an array of products but received something else.");
+            console.error('Products data is not an array:', products);
+            return res.status(500).json({ message: 'Error retrieving products: Data format invalid' });
         }
 
         const productList = products.map(product => ({
             product_id: product.product_id,
             product_name: product.product_name,
             price: product.price,
-            imageUrl: product.imageUrl || 'https://default-image-url.com'
+            imageUrl: product.imageUrl || 'https://th.bing.com/th/id/OIP.DAZvhmzO0sxCp-uWdJBEawHaFa?w=216&h=180&c=7&r=0&o=5&pid=1.7'
         }));
+        console.log('Product list formatted:', productList);
 
         res.json(productList);
     } catch (error) {
-        console.error('Error retrieving products:', error);
+        console.error('Error in /products route:', error.message);
         res.status(500).json({ message: 'Error retrieving products', details: error.message });
     }
 });
-
 
 // Check product availability based on stock info
 app.get('/check-product/:product_id', async (req, res) => {
