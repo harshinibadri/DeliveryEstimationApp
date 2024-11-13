@@ -1,9 +1,6 @@
 require('dotenv').config();
-<<<<<<< HEAD
 const express = require('express')
-=======
 const express = require('express');
->>>>>>> f2e908ed6c8090b65df27669193936f18a7d0073
 const cors = require('cors');
 const mongoose = require('mongoose');
 const Product = require('./models/Product');
@@ -11,17 +8,13 @@ const Pincode = require('./models/Pincode');
 const { getAllDocuments } = require('./utils/dbUtils');
 
 const app = express();
-<<<<<<< HEAD
 app.use(cors({ origin: 'http://127.0.0.1:5500' }));
 console.log('MongoDB URI:', process.env.MONGODB_URI);  // Add this line for debugging
-=======
-
 // Set up CORS to allow requests from your frontend domain
 app.use(cors({
     origin: ['https://delivery-estimation-frontend.vercel.app'],
     credentials: true
 }));
->>>>>>> f2e908ed6c8090b65df27669193936f18a7d0073
 app.use(express.json());
 
 // Connect to MongoDB using environment variable (Single approach)
