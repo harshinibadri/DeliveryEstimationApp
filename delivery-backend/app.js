@@ -1,4 +1,5 @@
-const express = require('express');
+require('dotenv').config();
+const express = require('express')
 const cors = require('cors');
 const mongoose = require('mongoose');
 const Product = require('./models/Product');
@@ -6,6 +7,7 @@ const Pincode = require('./models/Pincode');
 const { getAllDocuments } = require('./utils/dbUtils');
 const app = express();
 app.use(cors({ origin: 'http://127.0.0.1:5500' }));
+console.log('MongoDB URI:', process.env.MONGODB_URI);  // Add this line for debugging
 app.use(express.json());
 // Function to get delivery estimate
 const getDeliveryEstimate = (provider, pincode, orderTime, inStock) => {

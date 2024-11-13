@@ -4,6 +4,7 @@
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
+    "lint": "eslint .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -16,5 +17,8 @@
     "express": "^4.21.1",
     "mongodb": "^6.10.0",
     "mongoose": "^8.8.0"
+  },
+  "devDependencies": {
+    "eslint": "^9.14.0"
   }
 }
