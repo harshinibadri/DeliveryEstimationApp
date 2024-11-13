@@ -1,13 +1,13 @@
-const mongoose = require('mongoose');
-
+// In utils/dbUtils.js
 async function getAllDocuments(collectionName) {
     try {
-        const collection = mongoose.connection.collection(collectionName);
+        const db = mongoose.connection;
+        const collection = db.collection(collectionName);
         const documents = await collection.find({}).toArray();
+        console.log(`Documents fetched from ${collectionName}:`, documents);
         return documents;
     } catch (error) {
-        throw new Error(`Error fetching documents from ${collectionName}: ${error.message}`);
+        console.error(`Error fetching documents from ${collectionName}:`, error.message);
+        throw error;
     }
 }
-
-module.exports = { getAllDocuments };
