@@ -108,7 +108,7 @@ You can set up a frontend (e.g., React, Angular) and connect it to this backend 
 - **Request Body**:
   ```json
   {
-    "productId": "12345"
+    "productId": "1"
   }
   ```
 
@@ -120,7 +120,7 @@ You can set up a frontend (e.g., React, Angular) and connect it to this backend 
 - **Request Body**:
   ```json
   {
-    "productId": "12345",
+    "productId": "1",
     "pincode": "123456"
   }
   ```
