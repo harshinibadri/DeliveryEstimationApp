@@ -172,6 +172,5 @@ You can set up a frontend (e.g., React, Angular) and connect it to this backend 
 - **Port Conflicts**: If port 5000 is in use, change the `PORT` variable in `.env`.
 
 ---
-
-[Working Model]([https://www.google.com](https://drive.google.com/file/d/17_bslsW9dA5wOi6BAAL3-_LStb-vGs2B/view?usp=sharing))
+[Working Model](https://drive.google.com/file/d/17_bslsW9dA5wOi6BAAL3-_LStb-vGs2B/view?usp=sharing)
 
