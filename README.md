@@ -3,12 +3,15 @@
 
 This is a backend application for estimating delivery dates and checking product availability based on user-provided details. It is designed to integrate with a frontend for seamless user experience and can be extended for various e-commerce applications.
 Logistics Providers:
-#1. Provider A: Same-day delivery for orders placed before 5 PM, provided the product
-is in stock in the warehouse.
-#2. Provider B: Same-day delivery for orders placed before 9 AM; next-day delivery for
-orders placed after.
-#3. General Partners: Delivery within 2 to 5 days depending on the pincode (metro,
 
+1. Provider A: Same-day delivery for orders placed before 5 PM, provided the product
+
+is in stock in the warehouse.
+
+2. Provider B: Same-day delivery for orders placed before 9 AM; next-day delivery for
+orders placed after.
+
+3. General Partners: Delivery within 2 to 5 days depending on the pincode (metro,
 non-metro, or tier 2-3 cities).
 Challenge Details:
 1. Product Selection:
@@ -20,9 +23,9 @@ warehouse).
  Validate the pincode and associate it with the appropriate logistics provider.
 3. Delivery Date Estimation Logic:
  Use the pincode and provider to estimate the delivery date:
-■ Provider A: Same-day if ordered before 5 PM and in stock.
-■ Provider B: Same-day if ordered before 9 AM, next-day otherwise.
-■ General Partners: Delivery within 2-5 days depending on the region.
+## Provider A: Same-day if ordered before 5 PM and in stock.
+## Provider B: Same-day if ordered before 9 AM, next-day otherwise.
+## General Partners: Delivery within 2-5 days depending on the region.
 
 
 ## Table of Contents
